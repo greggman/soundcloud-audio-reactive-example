@@ -1,0 +1,113 @@
+<style>
+  canvas { border: 1px solid black; display: block; }
+</style>
+<p>music attribution:  <a href="http://youtu.be/eUX39M_0MJ8">DOCTOR VOX - Level Up</a></p>
+<canvas></canvas>
+<script type="module">
+"use strict";
+
+async function getToken() {
+  const res = await fetch('/token');
+  const {token} = await res.json();
+  return token;
+}
+
+async function getStreamURL(token) {
+  const options = {
+    method: 'GET',
+    headers: {
+      Authorization: `OAuth ${token}`,
+    },
+  };
+  const url = `https://api.soundcloud.com/resolve?${new URLSearchParams({
+    format: 'json',
+    url: 'https://soundcloud.com/chibi-tech/lolitazia-season',
+  })}`;
+
+  const res = await fetch(url, options);
+  const {stream_url} = await res.json();
+  return stream_url;
+}
+
+async function getRealStreamURL(url, token) {
+  const options = {
+    method: 'HEAD',
+    headers: {
+      Authorization: `OAuth ${token}`,
+    },
+  };
+  const res = await fetch(url, options);
+  return res.url;
+}
+
+async function main() {
+  let realSteamURL;
+  try {
+    const token = await getToken();
+    const streamUrl = await getStreamURL(token)
+    realSteamURL = await getRealStreamURL(streamUrl, token);
+  } catch (e) {
+    console.error(e);
+  }
+
+  const ctx = document.querySelector("canvas").getContext("2d");
+  ctx.fillText("click to start", 100, 75);
+  ctx.canvas.addEventListener('click', start);  
+
+  function start() {
+    ctx.canvas.removeEventListener('click', start);
+    // make a Web Audio Context
+    const context = new AudioContext();
+    const analyser = context.createAnalyser();
+
+    // Make a buffer to receive the audio data
+    const numPoints = analyser.frequencyBinCount;
+    const audioDataArray = new Uint8Array(numPoints);
+
+    function render() {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+      // get the current audio data
+      analyser.getByteFrequencyData(audioDataArray);
+
+      const width = ctx.canvas.width;
+      const height = ctx.canvas.height;
+      const size = 5;
+
+      // draw a point every size pixels
+      for (let x = 0; x < width; x += size) {
+        // compute the audio data for this point
+        const ndx = x * numPoints / width | 0;
+        // get the audio data and make it go from 0 to 1
+        const audioValue = audioDataArray[ndx] / 255;
+        // draw a rect size by size big
+        const y = audioValue * height;
+        ctx.fillRect(x, y, size, size);
+      }
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+
+    // Make a audio node
+    const audio = new Audio();
+    audio.loop = true;
+    audio.autoplay = true;
+
+    audio.crossOrigin = "anonymous";
+
+    // call `handleCanplay` when it music can be played
+    audio.addEventListener('canplay', handleCanplay);
+    audio.src = realSteamURL;
+    audio.load();
+
+    function handleCanplay() {
+      // connect the audio element to the analyser node and the analyser node
+      // to the main Web Audio context
+      const source = context.createMediaElementSource(audio);
+      source.connect(analyser);
+      analyser.connect(context.destination);
+    }
+  }
+}
+main();
+</script>

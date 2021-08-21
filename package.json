@@ -1,0 +1,25 @@
+{
+  "name": "soundcloud-audio-reactive-example",
+  "version": "1.0.0",
+  "description": "how to use soundcloud's new API to make an audio reactive example",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/greggman/soundcloud-audio-reactive-example.git"
+  },
+  "keywords": [
+    "soundcloud"
+  ],
+  "author": "Gregg Tavares",
+  "license": "Public Domain",
+  "bugs": {
+    "url": "https://github.com/greggman/soundcloud-audio-reactive-example/issues"
+  },
+  "homepage": "https://github.com/greggman/soundcloud-audio-reactive-example#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
