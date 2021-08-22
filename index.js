@@ -50,14 +50,16 @@ function isSoundCloudTokenValid() {
   if (!soundCloudToken) {
     return false;
   }
-  return getCurrentTimeInSeconds() > soundCloudExpiredTimeInSeconds;
+  return getCurrentTimeInSeconds() < soundCloudExpiredTimeInSeconds;
 }
 
 async function getSoundCloudToken(callback) {
   if (isSoundCloudTokenValid()) {
+    console.log("using existing token as it has not expired. TTL:", soundCloudExpiredTimeInSeconds - getCurrentTimeInSeconds() | 0);
     return soundCloudToken;
   }
 
+  console.log("getting new token from soundcloud");
   const form = {
     client_id: process.env['CLIENT_ID'],
     client_secret: process.env['SECRET'],
@@ -69,6 +71,7 @@ async function getSoundCloudToken(callback) {
   soundCloudToken = data.access_token;
   soundCloudRefreshToken = data.refresh_token;
   soundCloudExpiredTimeInSeconds = data.expires_in + getCurrentTimeInSeconds() - 10;
+  console.log("got token:", soundCloudToken);
 
   return soundCloudToken;
 }

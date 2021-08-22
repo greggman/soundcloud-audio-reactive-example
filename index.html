@@ -6,12 +6,14 @@
 "use strict";
 
 async function getToken() {
+  console.log('get token');
   const res = await fetch('/token');
   const {token} = await res.json();
   return token;
 }
 
 async function getStreamURL(token) {
+  console.log('call soundcloud resolve')
   const options = {
     method: 'GET',
     headers: {
@@ -28,14 +30,18 @@ async function getStreamURL(token) {
   return stream_url;
 }
 
-async function getRealStreamURL(url, token) {
+async function getRealStreamURL(href, token) {
+  console.log('call soundcloud HEAD with stream URL')
   const options = {
     method: 'HEAD',
+    // redirect: 'manual',
     headers: {
       Authorization: `OAuth ${token}`,
     },
   };
-  const res = await fetch(url, options);
+  const url = new URL(href);
+  //url.searchParams.set('_status_code_map[302]', 200);
+  const res = await fetch(url.toString(), options);
   return res.url;
 }
 
