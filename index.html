@@ -34,14 +34,11 @@ async function getRealStreamURL(href, token) {
   console.log('call soundcloud HEAD with stream URL')
   const options = {
     method: 'GET',
-    // redirect: 'manual',
     headers: {
       Authorization: `OAuth ${token}`,
     },
   };
-  const url = new URL(href);
-  //url.searchParams.set('_status_code_map[302]', 200);
-  const res = await fetch(url.toString(), options);
+  const res = await fetch(href, options);
   const {http_mp3_128_url} = await res.json();
   return http_mp3_128_url;
 }
