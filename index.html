@@ -5,52 +5,22 @@
 <script type="module">
 "use strict";
 
-async function getToken() {
-  console.log('get token');
-  const res = await fetch('/token');
-  const {token} = await res.json();
-  return token;
-}
-
-async function getStreamURL(token) {
-  console.log('call soundcloud resolve')
-  const options = {
-    method: 'GET',
-    headers: {
-      Authorization: `OAuth ${token}`,
-    },
-  };
-  const url = `https://api.soundcloud.com/resolve?${new URLSearchParams({
-    format: 'json',
-    url: 'https://soundcloud.com/chibi-tech/lolitazia-season',
-  })}`;
-
-  const res = await fetch(url, options);
-  const {stream_url} = await res.json();
-  return stream_url;
-}
-
-async function getRealStreamURL(href, token) {
-  console.log('call soundcloud HEAD with stream URL')
-  const options = {
-    method: 'GET',
-    headers: {
-      Authorization: `OAuth ${token}`,
-    },
-  };
-  const res = await fetch(href, options);
-  const {http_mp3_128_url} = await res.json();
-  return http_mp3_128_url;
+async function getTrackUrl(trackUrl) {
+  console.log('get track');
+  const res = await fetch(`/track_url?${new URLSearchParams({
+    url: trackUrl,
+  })}`);
+  const {url} = await res.json();
+  return url;
 }
 
 async function main() {
-  let realSteamURL;
+  let url;
   try {
-    const token = await getToken();
-    const streamUrl = await getStreamURL(token)
-    realSteamURL = await getRealStreamURL(`${streamUrl}s`, token);
+    url = await getTrackUrl('https://soundcloud.com/chibi-tech/lolitazia-season');
   } catch (e) {
     console.error(e);
+    return;
   }
 
   const ctx = document.querySelector("canvas").getContext("2d");
@@ -100,7 +70,7 @@ async function main() {
 
     // call `handleCanplay` when it music can be played
     audio.addEventListener('canplay', handleCanplay);
-    audio.src = realSteamURL;
+    audio.src = url;
     audio.load();
 
     function handleCanplay() {
