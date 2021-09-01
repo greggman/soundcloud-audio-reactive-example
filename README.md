@@ -37,3 +37,6 @@ worked with Chrome and Firefox it failed in Safari
 5. page waits for user to click
 6. page sets `src` field of `<audio>` tag to URL from step 4 and uses WebAudio API to analyse music as it streams
 
+# LICENSE
+
+CC0
